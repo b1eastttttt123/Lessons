@@ -33,6 +33,26 @@ class Users(db.Model):
         return '<User %r>' % self.name
 
 
+@app.route('/delete/<int:id>')
+def delete(id):
+    user_to_delete = Users.query.get_or_404(id)
+    name = None
+    form = UserForm()
+
+    try:
+        db.session.delete(user_to_delete)
+        db.session.commit()
+        flash('User Deleted Successfully!!')
+
+        our_users = Users.query.order_by(Users.date_added)
+        return render_template('add_user.html', form=form, name=name, our_users=our_users)
+
+    except:
+        flash('Whoops! There was a problem deleting user, try again...')
+        our_users = Users.query.order_by(Users.date_added)
+        return render_template('add_user.html', form=form, name=name, our_users=our_users)
+
+
 with app.app_context():
     db.create_all()
 
@@ -62,7 +82,7 @@ def update(id):
             flash('Error! There seems to be an issue... try again!')
             return render_template('update.html', form=form, name_to_update=name_to_update)
     else:
-        return render_template('update.html', form=form, name_to_update=name_to_update)
+        return render_template('update.html', form=form, name_to_update=name_to_update, id=id)
 
 
 # Создать класс формы
